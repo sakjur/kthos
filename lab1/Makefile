@@ -13,7 +13,8 @@ isfile:
 	gcc -m32 -g -s -o isfile.out isfile.s
 
 stat:
-	gcc -g -o stat.out libstat.o stat.c
+#	gcc -g -o stat.out libstat.o stat.c
+	gcc -g -o stat.out stat.c
 
 clean:
 	rm *.out
