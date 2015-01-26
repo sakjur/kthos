@@ -1,20 +1,22 @@
+CC=clang
+
 build: spock spock32 hello_asm isfile stat
 
 spock:
-	gcc -g -o spock.out spock.c
+	${CC} -g -o spock.out -Wno-deprecated-declarations spock.c
 
 spock32:
-	gcc -g -m32 -o spock32.out spock.c
+	${CC} -g -m32 -o spock32.out -Wno-deprecated-declarations spock.c
 
 hello_asm:
-	gcc -g -s -o hello.out hello.s
+	${CC} -g -s -o hello.out hello.s
 
 isfile:
-	gcc -m32 -g -s -o isfile.out isfile.s
+	${CC} -m32 -g -s -o isfile.out isfile.s
 
 stat:
+	${CC} -g -std=gnu11 -o stat.out stat.c
 #	gcc -g -o stat.out libstat.o stat.c
-	gcc -g -std=gnu11 -o stat.out stat.c
 
 clean:
 	rm *.out

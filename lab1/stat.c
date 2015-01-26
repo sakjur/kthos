@@ -33,9 +33,9 @@ void statPrint(char * file, struct stat * fileinfo) {
     privileges(fileinfo->st_mode, rv);
 
     printf("File: %s\n", file);
-    printf("Size: %-8u Blocks: %-8u I/O Block: %-8u\n",
+    printf("Size: %-8lu Blocks: %-8lu I/O Block: %-8lu\n",
         fileinfo->st_size, fileinfo->st_blocks, fileinfo->st_blksize);
-    printf("Device: %#010x Inode: %-8u Links: %-8u\n",
+    printf("Device: %#010lx Inode: %-8lu Links: %-8lu\n",
         fileinfo->st_dev, fileinfo->st_ino, fileinfo->st_nlink);
     printf("Access: (%06o / %s) UID: ( %u/ %s) GID: ( %u/ %s)\n",
         fileinfo->st_mode, rv,
