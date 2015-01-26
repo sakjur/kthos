@@ -47,9 +47,9 @@ void statPrint(char * file, struct stat * fileinfo) {
     
 }
 
-#define EXECUTE 9
-#define WRITE 8
-#define READ 7
+#define EXECUTE_CHAR 9
+#define WRITE_CHAR 8
+#define READ_CHAR 7
 /**
  * Takes a integerversion of accesslevels and converts it to a string stored
  * in rv. The string will be characters long
@@ -62,11 +62,11 @@ void privileges (int accesslevel, char * rv) {
     /* Iterate over the access levels for user, group and everyone */
     for (int i = 0; i < 3; i++) {
         if(0x1 & accesslevel)
-            rv[EXECUTE-3*i] = 'x';
+            rv[EXECUTE_CHAR-3*i] = 'x';
         if(0x2 & accesslevel)
-            rv[WRITE-3*i] = 'w';
+            rv[WRITE_CHAR-3*i] = 'w';
         if(0x4 & accesslevel)
-            rv[READ-3*i] = 'r';
+            rv[READ_CHAR-3*i] = 'r';
         accesslevel = accesslevel >> 3;
     }
 
