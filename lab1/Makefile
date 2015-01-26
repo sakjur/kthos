@@ -14,7 +14,7 @@ isfile:
 
 stat:
 #	gcc -g -o stat.out libstat.o stat.c
-	gcc -g -o stat.out stat.c
+	gcc -g -std=gnu11 -o stat.out stat.c
 
 clean:
 	rm *.out
