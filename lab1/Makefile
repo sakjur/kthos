@@ -24,7 +24,8 @@ isfile.out: isfile.s
 
 isfile_adv.out: isfile_adv.s
 	${ASM} -f elf64 -o isfile_adv.o isfile_adv.s
-	${LD} -s isfile_adv.o -o isfile_adv.out
+	${LD} isfile_adv.o -o isfile_adv.out -lc \
+		--dynamic-linker /usr/lib64/ld-2.20.so
 	rm isfile_adv.o
 	
 stat.out: stat.c

@@ -1,12 +1,12 @@
 section .data
-    minus_two: db "254", 0xA, 0
-    nil: db "0", 0xA, 0
+    integer_format: db "%i", 0xA, 0
 
 section .bss
-    sb: resb 1024
+    sb: resb 256
 
 section .text
 
+extern printf
 global _start
 _start:
     mov rax, 4 ; stat
@@ -15,20 +15,12 @@ _start:
     pop rdi
     mov rsi, sb
     syscall
-    mov r12, rax ; saving the return value from stat
-    mov rax, 1
-    mov rcx, r12
-    mov rdi, 1
-    jrcxz zero
-    mov rsi, minus_two
-    mov rdx, 5
-    jmp write
-zero:
-    mov rsi, nil
-    mov rdx, 3
-write:
-    syscall
-    mov rdi, r12
+    push rax ; saving the return value from stat
+    mov rdi, integer_format
+    mov rsi, rax
+    mov rax, 0
+    call printf
+    pop rdi
     mov rax, 60 ; exit
     syscall
     ret
