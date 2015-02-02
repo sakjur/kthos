@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+#define ARRSIZE 5
+#define ARRCONTENT {15,25,262,236,23}
+
 void prarr(int64_t * arrv, int64_t arrc) {
     for (uint64_t i = 0; i < arrc; i++)
     {
@@ -38,10 +41,10 @@ void forkarr(int64_t * arrv, int64_t arrc) {
 }
 
 void main(int argc, char * argv) {
-    int64_t array[5] = {15,25,262,236,23};
-    prarr(array, 5);
-    rearr(array, 5);
-    forkarr(array, 5);
+    int64_t array[ARRSIZE] = ARRCONTENT;
+    prarr(array, ARRSIZE);
+    rearr(array, ARRSIZE);
+    forkarr(array, ARRSIZE);
     exit(0);
 }
 
