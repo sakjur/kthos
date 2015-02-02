@@ -1,35 +1,40 @@
 CC=gcc
 ASM=nasm
 LD=ld
+OUTDIR=bin/
 
 build: spock.out spock32.out hello.out isfile.out isfile_adv.out stat.out \
 hello_nasm.out
 
-spock.out: spock.c
-	${CC} -g -o spock.out -Wno-deprecated-declarations spock.c
+spock.out: spock.c bindir
+	${CC} -g -o ${OUTDIR}spock.out -Wno-deprecated-declarations spock.c
 
-spock32.out: spock.c
-	${CC} -g -m32 -o spock32.out -Wno-deprecated-declarations spock.c
+spock32.out: spock.c bindir
+	${CC} -g -m32 -o ${OUTDIR}spock32.out -Wno-deprecated-declarations spock.c
 
-hello.out: hello.s 
-	${CC} -g -s -o hello.out hello.s
+hello.out: hello.s bindir
+	${CC} -g -s -o ${OUTDIR}hello.out hello.s
 
-hello_nasm.out: hello_nasm.s 
+hello_nasm.out: hello_nasm.s bindir 
 	${ASM} -f elf64 -o hello_nasm.o hello_nasm.s
-	${LD} -s hello_nasm.o -o hello_nasm.out
+	${LD} -s hello_nasm.o -o ${OUTDIR}hello_nasm.out
 	rm hello_nasm.o
 
-isfile.out: isfile.s
-	${CC} -m32 -g -s -o isfile.out isfile.s
+isfile.out: isfile.s bindir
+	${CC} -m32 -g -s -o ${OUTDIR}isfile.out isfile.s
 
-isfile_adv.out: isfile_adv.s
+isfile_adv.out: isfile_adv.s bindir
 	${ASM} -f elf64 -o isfile_adv.o isfile_adv.s
-	${LD} isfile_adv.o -o isfile_adv.out -lc \
+	${LD} isfile_adv.o -o ${OUTDIR}isfile_adv.out -lc \
 		--dynamic-linker /usr/lib64/ld-2.20.so
 	rm isfile_adv.o
 	
-stat.out: stat.c
-	${CC} -g -std=gnu11 -o stat.out stat.c
+stat.out: stat.c bindir
+	${CC} -g -std=gnu11 -o ${OUTDIR}stat.out stat.c
+
+bindir:
+	mkdir bin/
 
 clean:
-	rm *.out
+	rm bin/*.out || echo "No files removed."
+	rmdir bin/ || echo "bin/ not deleted"
