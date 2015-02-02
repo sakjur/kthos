@@ -10,8 +10,8 @@ _start:
     mov rsi, string
     mov rdx, 14 ; length of string
     syscall
-    mov rax, 60
-    mov rdi, 0
+    mov rax, 60 ; exit
+    mov rdi, 0 ; exitcode
     syscall
     ret
 

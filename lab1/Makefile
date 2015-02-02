@@ -4,7 +4,7 @@ LD=ld
 OUTDIR=bin/
 
 build: spock.out spock32.out hello.out isfile.out isfile_adv.out stat.out \
-hello_nasm.out
+hello_nasm.out stat_lib.out
 
 spock.out: spock.c bindir
 	${CC} -g -o ${OUTDIR}spock.out -Wno-deprecated-declarations spock.c
@@ -32,9 +32,12 @@ isfile_adv.out: isfile_adv.s bindir
 stat.out: stat.c bindir
 	${CC} -g -std=gnu11 -o ${OUTDIR}stat.out stat.c
 
+stat_lib.out: stat_lib.c bindir
+	${CC} -g -std=gnu11 -o ${OUTDIR}stat_lib.out stat_lib.c libs/libstat.o
+
 bindir:
-	mkdir bin/
+	-mkdir ${OUTDIR}
 
 clean:
-	rm bin/*.out || echo "No files removed."
-	rmdir bin/ || echo "bin/ not deleted"
+	-rm ${OUTDIR}*.out
+	-rmdir ${OUTDIR}
