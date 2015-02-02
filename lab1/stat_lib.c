@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     }
     else
     {
-        printf("Usage: ./stat.out <file>\n");
+        printf("Usage: %s <file>\n", argv[0]);
         exit(1);
     }
 
