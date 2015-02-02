@@ -29,8 +29,9 @@ void forkarr(int64_t * arrv, int64_t arrc) {
 
     if((chld = fork()) < 0) {
         fprintf(stderr, "Fork failed");
-    } else if (chld == 0) {
+    } else if (chld == 0) { // Child process
         printf("Fork %i: %li\n", getpid(), arrv[arrc-1]);
+        exit(0);
     } else {
         forkarr(arrv, arrc - 1);
     }
