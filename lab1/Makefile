@@ -2,6 +2,7 @@ CC=gcc
 ASM=nasm
 LD=ld
 OUTDIR=bin/
+LIBDIR=libs/
 
 build: spock.out spock32.out hello.out isfile.out isfile_adv.out stat.out \
 hello_nasm.out stat_lib.out
@@ -33,7 +34,13 @@ stat.out: stat.c bindir
 	${CC} -g -std=gnu11 -o ${OUTDIR}stat.out stat.c
 
 stat_lib.out: stat_lib.c bindir
-	${CC} -g -std=gnu11 -o ${OUTDIR}stat_lib.out stat_lib.c libs/libstat.o
+	${CC} -g -std=gnu11 -o ${OUTDIR}stat_lib.out stat_lib.c ${LIBDIR}libstat.o
+
+libstat.o: libdir
+	-wget http://cloud7.sics.se/is1350/libstat-64.o -O ${LIBDIR}libstat.o
+
+libdir:
+	-mkdir ${LIBDIR}
 
 bindir:
 	-mkdir ${OUTDIR}
