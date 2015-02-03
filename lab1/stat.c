@@ -28,6 +28,11 @@ int main(int argc, char* argv[]) {
 }
 
 void statPrint(char * file, struct stat * fileinfo) {
+    if (!fileinfo->st_size)
+    {
+        fprintf(stderr, "cannot stat '%s': No such file or directory\n", file);
+        exit(1);
+    }
     #define PERMISSION_STRING_CHARCNT 10
     struct passwd * userlst = getpwuid(fileinfo->st_uid);
     struct group * grouplst = getgrgid(fileinfo->st_gid);
@@ -58,8 +63,14 @@ void statPrint(char * file, struct stat * fileinfo) {
         fileinfo->st_gid, groupname);
     printf("Access: %s", ctime(&fileinfo->st_atim.tv_sec));
     printf("Modified: %s", ctime(&fileinfo->st_mtim.tv_sec));
-    printf("Created: %s", ctime(&fileinfo->st_ctim.tv_sec));
+    printf("Changed: %s", ctime(&fileinfo->st_ctim.tv_sec));
     
+    /*
+     * APUE notes that modified time and changed time is different, as
+     * modified indicates when the file's content was updated whilst
+     * changed when the I-node is changed, ergo on DAC-permission
+     * update or similar
+     */
 }
 
 #define EXECUTE_BIT 9
