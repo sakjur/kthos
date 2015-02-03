@@ -28,9 +28,24 @@ int main(int argc, char* argv[]) {
 }
 
 void statPrint(char * file, struct stat * fileinfo) {
-    char rv[11];
+    #define PERMISSION_STRING_CHARCNT 10
+    struct passwd * userlst = getpwuid(fileinfo->st_uid);
+    struct group * grouplst = getgrgid(fileinfo->st_gid);
+    char * username;
+    char * groupname;
 
+    char rv[PERMISSION_STRING_CHARCNT + 1];
     privileges(fileinfo->st_mode, rv);
+
+    if (userlst)
+        username = userlst->pw_name;
+    else
+        username = "-";
+
+    if (grouplst)
+        groupname = grouplst->gr_name;
+    else
+        groupname = "-";
 
     printf("File: %s\n", file);
     printf("Size: %-8lu Blocks: %-8lu I/O Block: %-8lu\n",
@@ -39,38 +54,38 @@ void statPrint(char * file, struct stat * fileinfo) {
         fileinfo->st_dev, fileinfo->st_ino, fileinfo->st_nlink);
     printf("Access: (%06o / %s) UID: ( %u/ %s) GID: ( %u/ %s)\n",
         fileinfo->st_mode, rv,
-        fileinfo->st_uid, getpwuid(fileinfo->st_uid)->pw_name,
-        fileinfo->st_gid, getgrgid(fileinfo->st_gid)->gr_name);
+        fileinfo->st_uid, username,
+        fileinfo->st_gid, groupname);
     printf("Access: %s", ctime(&fileinfo->st_atim.tv_sec));
     printf("Modified: %s", ctime(&fileinfo->st_mtim.tv_sec));
     printf("Created: %s", ctime(&fileinfo->st_ctim.tv_sec));
     
 }
 
-#define EXECUTE_CHAR 9
-#define WRITE_CHAR 8
-#define READ_CHAR 7
+#define EXECUTE_BIT 9
+#define WRITE_BIT 8
+#define READ_BIT 7
 /**
  * Takes a integerversion of accesslevels and converts it to a string stored
  * in rv. The string will be characters long
  */
 void privileges (int accesslevel, char * rv) {
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < PERMISSION_STRING_CHARCNT; i++)
         rv[i] = '-';
-    rv[0xA] = '\0'; 
+    rv[PERMISSION_STRING_CHARCNT] = '\0'; 
 
-    /* Iterate over the access levels for user, group and everyone */
+    /* iterate over the access levels for user, group and everyone */
     for (int i = 0; i < 3; i++) {
         if(0x1 & accesslevel)
-            rv[EXECUTE_CHAR-3*i] = 'x';
+            rv[EXECUTE_BIT-3*i] = 'x';
         if(0x2 & accesslevel)
-            rv[WRITE_CHAR-3*i] = 'w';
+            rv[WRITE_BIT-3*i] = 'w';
         if(0x4 & accesslevel)
-            rv[READ_CHAR-3*i] = 'r';
+            rv[READ_BIT-3*i] = 'r';
         accesslevel = accesslevel >> 3;
     }
 
-    // Sticky bit
+    // sticky bit
     if (0x1 & accesslevel)
         rv[0] = 's';
     // setgid
