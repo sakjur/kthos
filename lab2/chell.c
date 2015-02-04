@@ -26,6 +26,8 @@ void main(int argc, char * argv[]) {
             if (c != NULL)
                 *c = '\0';
 
+            // TODO Translate ~ to pw_dir from getuid()
+
             if(chdir(cwd) != 0)
                 fprintf(stderr, "Cannot find directory %s\n", cwd);
         } else {
