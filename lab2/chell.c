@@ -11,7 +11,7 @@ void main(int argc, char * argv[]) {
         printf("%> ");
         fgets(strbuf, (STRINGBUFFER-1), stdin);
 
-        if (!strncmp(strbuf, "exit", 4))
+        if (!strcmp(strbuf, "exit\n") || !strncmp(strbuf, "exit ", 5))
         {
             printf("Shutting down...\n");
             exit(0);
