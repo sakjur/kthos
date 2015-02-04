@@ -18,7 +18,7 @@ function printout {
         done
 
         echo $FILE;
-        if [ ${FILE: -1} = "/" ]; then # Last character of variable
+        if [[ ${FILE: -1} = "/" ]]; then # Last character of variable
             NEWFOLDER=$1"/"$FILE;
             printout "$NEWFOLDER" "$2 1";
         fi
@@ -26,7 +26,7 @@ function printout {
 }
 
 # On no argument, use current directory. Otherwise use first argument as dir
-if [ $1 = "" ]; then
+if [[ $1 = "" ]]; then
     FOLDER=`pwd`;
 else
     FOLDER=$1;
