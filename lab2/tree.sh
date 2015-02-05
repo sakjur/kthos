@@ -10,14 +10,19 @@ function printout {
     # Bash doesn't seem to like local variables, so not giving them
     # human-friendly names
 
-    ls -p "$1" | while read FILE
+    ls -F "$1" | while read FILE
     do
         for UNIT in $2
         do
             echo -n "-";
         done
 
-        echo $FILE;
+        if [[ ${FILE: -1} = "@" ]]; then # Last character of variable
+            FILE=${FILE::-1}
+            echo $FILE "->" $(readlink $1"/"$FILE)
+        else
+            echo $FILE;
+        fi
         if [[ ${FILE: -1} = "/" ]]; then # Last character of variable
             NEWFOLDER=$1"/"$FILE;
             printout "$NEWFOLDER" "$2 1";
