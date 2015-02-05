@@ -40,8 +40,10 @@ void mytree(char * directory, int level) {
         for (int i = level; i > 0; i--)
             if (i == 1)
                 printf("-");
-            else
+            else if (i == 2)
                 printf("|");
+            else
+                printf(" ");
 
         if (fileentry->d_type == TYPE_DIR) {
             printf(" %s/\n", fileentry->d_name);
