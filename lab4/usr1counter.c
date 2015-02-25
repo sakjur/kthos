@@ -20,12 +20,16 @@ void usr1b(int);
 int sigupdate(int, void *);
 
 int main(void) {
-    // signal(2) manpage says it's OK to use signal() for SIG_IGN
-    if (signal(SIGINT, SIG_IGN) == SIG_ERR)
-        fprintf(stderr, "\nSIGINT catch failed\n");
+    /**
+     * Ignores SIGINT and sets the signal handler for SIGUSR1 to usr1a
+     */
 
     if (sigupdate(SIGUSR1, &usr1a) == -1) 
         fprintf(stderr, "\nSIGUSR1 catch failed\n");
+
+    // signal(2) manpage says it's OK to use signal() for SIG_IGN
+    if (signal(SIGINT, SIG_IGN) == SIG_ERR)
+        fprintf(stderr, "\nSIGINT catch failed\n");
 
     printf("PID: %d\n", getpid());
     while(1)
@@ -47,6 +51,9 @@ int sigupdate(int signo, void * fp) {
 }
 
 void usr1a(int signo) {
+    /**
+     * Re-allocate the signal handler for signo to usr1b()
+     */
     if(sigupdate(signo, &usr1b) == -1)
         fprintf(stderr, "\nCould not rebind signal %d to usr1b\n", signo);
 }
