@@ -1,6 +1,6 @@
 CC=clang
 OUTDIR=bin
-CSTD=c99
+CSTD=c11
 FLAGS=-g -Wall -Wextra -std=${CSTD}
 
 .SUFFIXES: .c .h .o .out .so
@@ -11,10 +11,7 @@ FLAGS=-g -Wall -Wextra -std=${CSTD}
 .c.out:
 	${CC} ${FLAGS} -o ${OUTDIR}/$@ $?
 
-#.o.out:
-#	${CC} ${FLAGS} -o ${OUTDIR}/$@ $?
-
-FILES = usr1counter
+FILES = usr1counter pipe server client
 
 all: outdir compile
 
