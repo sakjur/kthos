@@ -44,17 +44,34 @@ int main(int argc, char * argv[])
 void loop(struct fd_socket *conn) {
     int counter = 0;
     char buffer[BUFSIZE];
-    memset(buffer, '\0', sizeof(buffer));
+    char auxbuf[BUFSIZE];
 
-    write(conn->fd, "hej", 3);
+    write(conn->fd, "EHLO", 4);
 
-    read(conn->fd, buffer, sizeof(buffer)-1);
-    printf("%s\n", buffer);
+    while(1) {
+        memset(buffer, '\0', sizeof(buffer));
+        memset(auxbuf, '\0', sizeof(auxbuf));
+        printf("[[> ");
+        fgets(buffer, (BUFSIZE-1), stdin);
+        
+        sprintf(auxbuf, "%lu", strlen(buffer));
+        write(conn->fd, auxbuf, strlen(auxbuf));
+        write(conn->fd, buffer, strlen(buffer));
 
-    if (counter < 0)
-    {
-        fprintf(stderr, "Error: Negative read buffer\n");
-        exit(-1);
+        if (!strcmp(buffer, "exit\n") || !strncmp(buffer, "exit ", 5))
+        {
+            printf("Shutting down...\n");
+            exit(0);
+        }
+
+        read(conn->fd, buffer, sizeof(buffer)-1);
+        printf("%s\n", buffer);
+
+        if (counter < 0)
+        {
+            fprintf(stderr, "Error: Negative read buffer\n");
+            exit(-1);
+        }
     }
 }
 

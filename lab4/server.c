@@ -9,13 +9,21 @@
 #include "mytelnet.h"
 
 #define NUM_CONNECTIONS 10
+#define INIT_FAIL_STR "Client should send EHLO as first message"
 
-struct fd_socket init_server();
+struct fd_socket init_server(int port);
 void client_handler(int);
 
-int main(void)
+int main(int argc, char * argv[])
 {
-    struct fd_socket sock_serv = init_server();
+    int port = SERV_PORT;
+
+    if (argc > 1)
+    {
+        port = atoi(argv[1]);
+    }
+
+    struct fd_socket sock_serv = init_server(port);
     int connfd;
 
     while (1)
@@ -40,15 +48,60 @@ int main(void)
 
 void client_handler(int connfd) {
     time_t ticks;
+    printf("Connection Established\n");
     char buffer[BUFSIZE];
     memset(&buffer, '\0', sizeof(buffer));
     read(connfd, buffer, sizeof(buffer)-1);
-    printf("%s\n", buffer);
 
-    write(connfd, "hej", strlen("hej"));
+    if (strncmp("EHLO", buffer, 4) != 0) {
+        printf("Initialization failed\n");
+        sprintf(buffer, "%lu", strlen(INIT_FAIL_STR));
+        
+        write(connfd, buffer, strlen(buffer));
+        write(connfd, INIT_FAIL_STR, strlen(INIT_FAIL_STR));
+        return;
+    };
+
+    while(1) {
+        memset(&buffer, '\0', sizeof(buffer));
+        read(connfd, buffer, sizeof(buffer)-1);
+        unsigned long len_incoming = atoi(buffer);
+        printf("%s", buffer);
+
+        while(len_incoming > 0)
+        {
+            unsigned long recv;
+            memset(&buffer, '\0', sizeof(buffer));
+
+            if (sizeof(buffer)-1 > len_incoming) {
+                recv = len_incoming;
+            } else {
+                len_incoming = len_incoming - (sizeof(buffer)-1);
+                recv = sizeof(buffer)-1;
+            }
+
+            int offset = read(connfd, buffer, recv);
+
+            printf("%d\n", offset);
+            printf("%s", buffer);
+
+            if (offset == 0) {
+                printf("\n");
+                break;
+            }
+
+            if (offset < 0) {
+                fprintf(stderr, "ERROR! OFFSET LESS THAN ONE");
+                fprintf(stderr, "[...]Killing client");
+                return;
+            }
+        }
+
+        write(connfd, "OK", 2);
+    }
 }
 
-struct fd_socket init_server()
+struct fd_socket init_server(int port)
 {
     struct fd_socket rv;
     rv.fd = 0;
@@ -64,7 +117,7 @@ struct fd_socket init_server()
 
     rv.server_addr.sin_family = AF_INET;
     rv.server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    rv.server_addr.sin_port = htons(SERV_PORT);
+    rv.server_addr.sin_port = htons(port);
 
     errno = 0;
 
@@ -87,7 +140,7 @@ struct fd_socket init_server()
         exit(-1);
     }
 
-    printf("Listening on port %d\n", SERV_PORT);
+    printf("Listening on port %d\n", port);
 
     return rv;
 }
