@@ -1,3 +1,4 @@
+#define _XOPEN_SOURCE 600
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,57 +48,52 @@ int main(int argc, char * argv[])
 }
 
 void client_handler(int connfd) {
-    time_t ticks;
     printf("Connection Established\n");
     char buffer[BUFSIZE];
-    memset(&buffer, '\0', sizeof(buffer));
-    read(connfd, buffer, sizeof(buffer)-1);
+    char auxbuf[BUFSIZE];
+    unsigned long recv;
+    unsigned long len_incoming;
 
-    if (strncmp("EHLO", buffer, 4) != 0) {
-        printf("Initialization failed\n");
-        sprintf(buffer, "%lu", strlen(INIT_FAIL_STR));
-        
-        write(connfd, buffer, strlen(buffer));
-        write(connfd, INIT_FAIL_STR, strlen(INIT_FAIL_STR));
-        return;
-    };
+    memset(buffer, '\0', sizeof(buffer));
+    memset(auxbuf, '\0', sizeof(auxbuf));
 
     while(1) {
-        memset(&buffer, '\0', sizeof(buffer));
-        read(connfd, buffer, sizeof(buffer)-1);
-        unsigned long len_incoming = atoi(buffer);
-        printf("%s", buffer);
+        memset(buffer, '\0', sizeof(buffer));
+        fgets(buffer, sizeof(buffer)-1, fdopen(connfd, "r"));
+        len_incoming = atoi(buffer);
+        write(connfd, buffer, strlen(buffer));
 
-        while(len_incoming > 0)
-        {
-            unsigned long recv;
-            memset(&buffer, '\0', sizeof(buffer));
-
-            if (sizeof(buffer)-1 > len_incoming) {
-                recv = len_incoming;
-            } else {
-                len_incoming = len_incoming - (sizeof(buffer)-1);
-                recv = sizeof(buffer)-1;
-            }
-
-            int offset = read(connfd, buffer, recv);
-
-            printf("%d\n", offset);
-            printf("%s", buffer);
-
-            if (offset == 0) {
-                printf("\n");
-                break;
-            }
-
-            if (offset < 0) {
-                fprintf(stderr, "ERROR! OFFSET LESS THAN ONE");
-                fprintf(stderr, "[...]Killing client");
-                return;
-            }
+        if (sizeof(buffer)-1 > len_incoming) {
+            recv = len_incoming;
+            len_incoming = 0;
+        } else {
+            fprintf(stderr, "ERROR! Command too long");
+            fprintf(stderr, "[...]Killing client");
+            return;
         }
 
-        write(connfd, "OK", 2);
+        memset(buffer, '\0', sizeof(buffer));
+        fgets(buffer, recv, fdopen(connfd, "r")); // Get command
+        
+        if (!strcmp(buffer, "exit\n") || !strncmp(buffer, "exit ", 5))
+            return;
+
+        FILE * cmd = popen(buffer, "r");
+        while (1)
+        {
+            memset(buffer, '\0', sizeof(buffer));
+            fgets(buffer, sizeof(buffer)-1, cmd);
+
+            memset(auxbuf, '\0', sizeof(auxbuf));
+            sprintf(auxbuf, "%lu\n", strlen(buffer));
+            write(connfd, auxbuf, strlen(auxbuf));
+            read(connfd, auxbuf, strlen(auxbuf)); // Client confirms len
+            if (strlen(buffer) > 0)
+                write(connfd, buffer, strlen(buffer));
+            else
+                break;
+        }
+        pclose(cmd);
     }
 }
 

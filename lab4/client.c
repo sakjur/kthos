@@ -26,7 +26,8 @@ int main(int argc, char * argv[])
     }
 
     struct fd_socket conn = open_connection(argv[1], portno);
-    loop(&conn);
+    while(1)
+        loop(&conn);
 
     /*while((counter = read(conn.fd, buffer, sizeof(buffer)-1)) > 0)
     {
@@ -42,35 +43,53 @@ int main(int argc, char * argv[])
 }
 
 void loop(struct fd_socket *conn) {
-    int counter = 0;
     char buffer[BUFSIZE];
     char auxbuf[BUFSIZE];
 
-    write(conn->fd, "EHLO", 4);
+    memset(buffer, '\0', sizeof(buffer));
+    memset(auxbuf, '\0', sizeof(auxbuf));
+    printf("[[> ");
+    fgets(buffer, (BUFSIZE-1), stdin);
+
+    sprintf(auxbuf, "%lu\n", strlen(buffer));
+    write(conn->fd, auxbuf, strlen(auxbuf));
+    read(conn->fd, auxbuf, strlen(auxbuf));
+    write(conn->fd, buffer, strlen(buffer));
+
+    if (!strcmp(buffer, "exit\n") || !strncmp(buffer, "exit ", 5))
+    {
+        printf("Shutting down...\n");
+        exit(0);
+    }
 
     while(1) {
-        memset(buffer, '\0', sizeof(buffer));
         memset(auxbuf, '\0', sizeof(auxbuf));
-        printf("[[> ");
-        fgets(buffer, (BUFSIZE-1), stdin);
-        
-        sprintf(auxbuf, "%lu", strlen(buffer));
+        read(conn->fd, auxbuf, sizeof(auxbuf)-1); // Length of incoming
         write(conn->fd, auxbuf, strlen(auxbuf));
-        write(conn->fd, buffer, strlen(buffer));
+        unsigned long len_incoming = atoi(auxbuf);
 
-        if (!strcmp(buffer, "exit\n") || !strncmp(buffer, "exit ", 5))
+        if (len_incoming == 0)
+            break;
+
+        while(len_incoming > 0)
         {
-            printf("Shutting down...\n");
-            exit(0);
-        }
+            unsigned long recv;
+            memset(buffer, '\0', sizeof(buffer));
 
-        read(conn->fd, buffer, sizeof(buffer)-1);
-        printf("%s\n", buffer);
+            if (sizeof(buffer)-1 > len_incoming) {
+                recv = len_incoming;
+                len_incoming = 0;
+            } else {
+                len_incoming = len_incoming - (sizeof(buffer)-1);
+                recv = sizeof(buffer)-1;
+            }
 
-        if (counter < 0)
-        {
-            fprintf(stderr, "Error: Negative read buffer\n");
-            exit(-1);
+            printf("%lu\n", recv);
+            int offset = read(conn->fd, buffer, recv);
+            printf("%s", buffer);
+
+            if (offset == 0)
+                break;
         }
     }
 }
