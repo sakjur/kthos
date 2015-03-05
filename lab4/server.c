@@ -39,6 +39,7 @@ int main(int argc, char * argv[])
         else if (chld == 0)
         { 
             client_handler(connfd);
+            printf("Connection terminated...\n");
             close(connfd);
             exit(0);
         }
