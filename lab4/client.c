@@ -29,16 +29,6 @@ int main(int argc, char * argv[])
     while(1)
         loop(&conn);
 
-    /*while((counter = read(conn.fd, buffer, sizeof(buffer)-1)) > 0)
-    {
-        printf("%s:%d >", argv[1], portno);
-        buffer[counter] = '\0';
-        if (fputs(buffer, stdout) == EOF)
-        {
-            fprintf(stderr, "\n Error: fputs error \n");
-        }
-    }*/
-
     exit(0);
 }
 
