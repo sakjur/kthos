@@ -75,26 +75,48 @@ void client_handler(int connfd) {
 
         memset(buffer, '\0', sizeof(buffer));
         fgets(buffer, recv, fdopen(connfd, "r")); // Get command
+        printf("Recvd: %s\n", buffer);
         
         if (!strcmp(buffer, "exit\n") || !strncmp(buffer, "exit ", 5))
             return;
 
-        FILE * cmd = popen(buffer, "r");
-        while (1)
+        if (!strncmp(buffer, "cd ", 3))
         {
-            memset(buffer, '\0', sizeof(buffer));
-            fgets(buffer, sizeof(buffer)-1, cmd);
+            char * directory = buffer+3;
+            char * c = strchr(directory, '\n');
 
+            if (c != NULL)
+                *c = '\0';
+
+            chdir(directory);
+            memset(buffer, '\0', sizeof(buffer));
+            getcwd(buffer, sizeof(buffer));
             memset(auxbuf, '\0', sizeof(auxbuf));
-            sprintf(auxbuf, "%lu\n", strlen(buffer));
+            sprintf(auxbuf, "%lu\n", strlen(buffer)+1);
+            sprintf(buffer, "%s\n", buffer);
             write(connfd, auxbuf, strlen(auxbuf));
             read(connfd, auxbuf, strlen(auxbuf)); // Client confirms len
-            if (strlen(buffer) > 0)
-                write(connfd, buffer, strlen(buffer));
-            else
-                break;
+            write(connfd, buffer, strlen(buffer));
+            write(connfd, "0\n", 2);
+            read(connfd, auxbuf, 2); // Client confirms len
+        } else {
+            FILE * cmd = popen(buffer, "r");
+            while (1)
+            {
+                memset(buffer, '\0', sizeof(buffer));
+                fgets(buffer, sizeof(buffer)-1, cmd);
+
+                memset(auxbuf, '\0', sizeof(auxbuf));
+                sprintf(auxbuf, "%lu\n", strlen(buffer));
+                write(connfd, auxbuf, strlen(auxbuf));
+                read(connfd, auxbuf, strlen(auxbuf)); // Client confirms len
+                if (strlen(buffer) > 0)
+                    write(connfd, buffer, strlen(buffer));
+                else
+                    break;
+            }
+            pclose(cmd);
         }
-        pclose(cmd);
     }
 }
 
